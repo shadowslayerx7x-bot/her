@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>For You 💜</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Quicksand:wght@300;400;500&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      box-sizing: border-box;
+      height: 100%;
+    }
+    
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .font-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    
+    .font-body {
+      font-family: 'Quicksand', sans-serif;
+    }
+    
+    @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+    @keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+    @keyframes sparkle { 0%, 100% { opacity: 0; transform: scale(0); } 50% { opacity: 1; transform: scale(1); } }
+    @keyframes heartbeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.15); } 30% { transform: scale(1); } 45% { transform: scale(1.1); } 60% { transform: scale(1); } }
+    @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes letter-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes swirl { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; } }
+    @keyframes confetti-burst { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.1); opacity: 0; } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+    @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+    .animate-heartbeat { animation: heartbeat 1.5s ease-in-out; }
+    .animate-orbit { animation: orbit 4s linear infinite; }
+    
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+      opacity: 0;
+      pointer-events: none;
+      padding: 1.5rem;
+      overflow: auto;
+    }
+    
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .gift-card {
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+    
+    .gift-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    .gift-card:active {
+      transform: scale(0.98);
+    }
+    
+    .gift-card.opened {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
+    }
+    
+    .back-button {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    
+    .back-button.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .progress-dots {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(236, 72, 153, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .progress-dot.filled {
+      background: rgba(236, 72, 153, 0.9);
+      box-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+    }
+    
+    .star-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
+    }
+    
+    #heart-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-hidden font-body" style="background: linear-gradient(135deg, #0f0f1e 0%, #1a0a2e 50%, #0f0f1e 100%);">
+  <div id="app" class="relative h-full w-full overflow-hidden"><!-- Floating Background Elements -->
+   <div id="bg-particles" class="absolute inset-0 overflow-hidden pointer-events-none"></div><!-- Scene 1: Opening Question -->
+   <div id="scene-opening" class="scene active">
+    <div class="text-center max-w-sm mx-auto">
+     <div class="mb-8 animate-float">
+      <svg viewbox="0 0 100 100" class="w-24 h-24 mx-auto" style="filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.6));"><defs>
+        <lineargradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+         <stop offset="0%" style="stop-color:#ec4899" />
+         <stop offset="50%" style="stop-color:#a855f7" />
+         <stop offset="100%" style="stop-color:#3b82f6" />
+        </lineargradient>
+       </defs> <path d="M50 88 C20 60, 5 40, 15 25 C25 10, 45 15, 50 30 C55 15, 75 10, 85 25 C95 40, 80 60, 50 88Z" fill="url(#heartGrad)" class="animate-pulse-soft" />
+      </svg>
+     </div>
+     <h1 id="opening-text" class="font-heading text-3xl md:text-4xl text-white mb-2 tracking-wide" style="text-shadow: 0 0 30px rgba(236, 72, 153, 0.4);">Will you be my Valentine? 💜</h1>
+     <p id="recipient-greeting" class="text-pink-200/80 text-lg mb-10 font-light italic">— for Maheer</p>
+     <div class="flex flex-col gap-4 items-center"><button id="btn-yes" class="px-10 py-4 rounded-full text-white font-medium text-lg transition-all duration-300 hover:scale-105 active:scale-95" style="background: linear-gradient(135deg, #ec4899, #a855f7); box-shadow: 0 4px 20px rgba(236, 72, 153, 0.5);"> Yes 💖 </button> <button id="btn-no" class="px-10 py-4 rounded-full text-pink-200/80 font-medium text-lg transition-all duration-300 hover:text-white border border-pink-300/30 hover:border-pink-300/50 active:scale-95"> No 🙃 </button>
+     </div>
+     <p id="no-response" class="mt-6 text-pink-400 opacity-0 transition-opacity duration-300 text-lg">I only want yes 😊</p>
+    </div>
+   </div><!-- Scene 2: Gifts Screen -->
+   <div id="scene-gifts" class="scene"><button id="back-to-gifts" class="back-button text-pink-200/70 hover:text-white transition-colors flex items-center gap-2 text-sm">
+     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+     </svg> Gifts </button>
+    <div id="gifts-container" class="w-full max-w-sm mx-auto">
+     <h2 class="font-heading text-2xl md:text-3xl text-white text-center mb-8" style="text-shadow: 0 0 20px rgba(236, 72, 153, 0.3);">I have something for you ✨</h2>
+     <div class="space-y-4">
+      <div id="gift-1" class="gift-card p-5 rounded-2xl backdrop-blur-sm cursor-pointer" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.1)); border: 1px solid rgba(236, 72, 153, 0.3);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3));">
+         💌
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white font-medium">Love Letter</h3>
+         <p class="text-pink-200/60 text-sm">Tap to reveal</p>
+        </div>
+        <div id="gift-1-status" class="text-pink-400/50 text-xl">
+         ✦
+        </div>
+       </div>
+      </div>
+      <div id="gift-2" class="gift-card p-5 rounded-2xl backdrop-blur-sm opacity-50" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(168, 85, 247, 0.1);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));">
+         ✨
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white/60 font-medium">Starlight Jar</h3>
+         <p id="gift-2-hint" class="text-pink-200/40 text-sm">Open previous gift first</p>
+        </div>
+        <div id="gift-2-status" class="text-pink-300/30 text-xl">
+         🔒
+        </div>
+       </div>
+      </div>
+      <div id="gift-3" class="gift-card p-5 rounded-2xl backdrop-blur-sm opacity-50" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(168, 85, 247, 0.1);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));">
+         📝
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white/60 font-medium">Magnetic Notes</h3>
+         <p id="gift-3-hint" class="text-pink-200/40 text-sm">Open previous gifts first</p>
+        </div>
+        <div id="gift-3-status" class="text-pink-300/30 text-xl">
+         🔒
+        </div>
+       </div>
+      </div>
+      <div id="gift-4" class="gift-card p-5 rounded-2xl backdrop-blur-sm opacity-50" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(168, 85, 247, 0.1);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));">
+         🎵
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white/60 font-medium">Music Box</h3>
+         <p id="gift-4-hint" class="text-pink-200/40 text-sm">Open previous gifts first</p>
+        </div>
+        <div id="gift-4-status" class="text-pink-300/30 text-xl">
+         🔒
+        </div>
+       </div>
+      </div>
+      <div id="gift-5" class="gift-card p-5 rounded-2xl backdrop-blur-sm opacity-50" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(168, 85, 247, 0.1);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));">
+         🎉
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white/60 font-medium">Confetti Heart</h3>
+         <p id="gift-5-hint" class="text-pink-200/40 text-sm">Open previous gifts first</p>
+        </div>
+        <div id="gift-5-status" class="text-pink-300/30 text-xl">
+         🔒
+        </div>
+       </div>
+      </div>
+      <div id="gift-6" class="gift-card p-5 rounded-2xl backdrop-blur-sm opacity-50" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(168, 85, 247, 0.1);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));">
+         🏷️
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white/60 font-medium">Sticker Reveal</h3>
+         <p id="gift-6-hint" class="text-pink-200/40 text-sm">Open previous gifts first</p>
+        </div>
+        <div id="gift-6-status" class="text-pink-300/30 text-xl">
+         🔒
+        </div>
+       </div>
+      </div>
+      <div id="gift-7" class="gift-card p-5 rounded-2xl backdrop-blur-sm opacity-50" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(168, 85, 247, 0.1);">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));">
+         💫
+        </div>
+        <div class="flex-1">
+         <h3 class="text-white/60 font-medium">The Promise</h3>
+         <p id="gift-7-hint" class="text-pink-200/40 text-sm">Open previous gifts first</p>
+        </div>
+        <div id="gift-7-status" class="text-pink-300/30 text-xl">
+         🔒
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="progress-dots">
+      <div id="dot-1" class="progress-dot"></div>
+      <div id="dot-2" class="progress-dot"></div>
+      <div id="dot-3" class="progress-dot"></div>
+      <div id="dot-4" class="progress-dot"></div>
+      <div id="dot-5" class="progress-dot"></div>
+      <div id="dot-6" class="progress-dot"></div>
+      <div id="dot-7" class="progress-dot"></div>
+     </div>
+     <p id="final-hint" class="text-center text-pink-200/50 text-sm mt-4 opacity-0 transition-opacity duration-500 cursor-pointer hover:text-pink-200/80">Something special awaits... ✨</p>
+    </div>
+    <div id="gift-1-content" class="absolute inset-0 p-6 overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <div class="max-w-sm mx-auto pt-12 pb-8">
+      <div class="text-center mb-6">
+       <span class="text-4xl">💜</span>
+      </div>
+      <div id="letter-content" class="text-pink-100/90 leading-relaxed space-y-4 font-light" style="font-size: 1.05rem;"></div>
+     </div>
+    </div>
+    <div id="gift-2-content" class="absolute inset-0 p-6 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <p class="text-pink-200/70 text-sm mb-6 absolute top-20">Tap or hold to release stars 🌟</p>
+     <div id="starlight-container" class="relative w-64 h-64 md:w-80 md:h-80" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%); border-radius: 50%; border: 2px solid rgba(168, 85, 247, 0.2);"></div>
+    </div>
+    <div id="gift-3-content" class="absolute inset-0 p-6 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <p class="text-pink-200/70 text-sm mb-4 absolute top-20">Write your own message 💕</p><textarea id="magnetic-textarea" class="w-full max-w-sm h-48 p-4 rounded-xl text-white font-body text-base resize-none border-2 border-pink-400/30 focus:border-pink-400/60 focus:outline-none transition-all duration-300" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(168, 85, 247, 0.1)); backdrop-filter: blur(10px);" placeholder="Write something special for me..."></textarea> <button id="magnetic-save-btn" class="mt-4 px-8 py-2 rounded-full text-white font-medium text-sm transition-all duration-300 hover:scale-105 active:scale-95" style="background: linear-gradient(135deg, #ec4899, #a855f7); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">Save Message 💖</button>
+     <div id="magnetic-result" class="text-center text-pink-300 text-xl mt-8 opacity-0 transition-opacity duration-500 font-heading leading-relaxed max-w-sm"></div>
+    </div>
+    <div id="gift-4-content" class="absolute inset-0 p-6 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <p class="text-pink-200/70 text-sm mb-6">Tap the music box 🎵</p>
+     <div id="music-box-btn" class="w-24 h-24 rounded-full cursor-pointer flex items-center justify-center text-4xl transition-transform duration-200 hover:scale-110 active:scale-95" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3)); border: 2px solid rgba(236, 72, 153, 0.5); box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.2);">
+      🎵
+     </div>
+     <div id="music-message" class="text-center text-pink-100/90 text-lg mt-8 opacity-0 transition-opacity duration-500 font-light leading-relaxed max-w-sm italic">
+      Darling, just hold my hands. Be my girl, I will be your man. 💫
+     </div>
+     <div id="music-particles-container" class="absolute inset-0 pointer-events-none"></div>
+    </div>
+    <div id="gift-5-content" class="absolute inset-0 p-6 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <p class="text-pink-200/70 text-sm mb-8">Tap to burst hearts 🎉</p>
+     <div id="confetti-heart-btn" class="w-32 h-32 cursor-pointer flex items-center justify-center text-6xl transition-transform duration-200 hover:scale-110 active:scale-95">
+      💖
+     </div>
+     <p class="text-pink-300/70 text-sm mt-8 italic">Every burst is a heartbeat for you.</p>
+     <div id="confetti-particles-container" class="absolute inset-0 pointer-events-none"></div>
+    </div>
+    <div id="gift-6-content" class="absolute inset-0 p-6 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <p class="text-pink-200/70 text-sm mb-8">Tap stickers to reveal 🏷️</p>
+     <div id="stickers-grid" class="grid grid-cols-3 gap-6"></div>
+    </div>
+    <div id="gift-7-content" class="absolute inset-0 p-6 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" style="background: linear-gradient(180deg, #0f0f1e 0%, #1a0a2e 100%);">
+     <div class="text-center max-w-xs">
+      <div id="promise-ring" class="w-32 h-32 mx-auto mb-6 relative animate-orbit">
+       <svg viewbox="0 0 100 100" class="w-full h-full"><defs>
+         <lineargradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#ec4899" />
+          <stop offset="50%" style="stop-color:#a855f7" />
+          <stop offset="100%" style="stop-color:#3b82f6" />
+         </lineargradient>
+        </defs> <circle cx="50" cy="50" r="40" fill="none" stroke="url(#ringGrad)" stroke-width="3" opacity="0.8" /> <circle cx="50" cy="15" r="3" fill="#ec4899" />
+       </svg>
+      </div>
+      <p class="text-pink-100/90 text-lg leading-relaxed font-light">A circle without end, just like my commitment to you.</p>
+      <p class="text-pink-400/90 text-lg mt-4 italic">Forever yours 💫</p>
+     </div>
+    </div>
+   </div><!-- Scene 3: Final Heart -->
+   <div id="scene-final" class="scene">
+    <div id="heart-container" class="relative w-full h-full flex items-center justify-center">
+     <canvas id="heart-canvas"></canvas>
+    </div>
+    <div class="text-center px-4 absolute bottom-12 w-full">
+     <p id="final-message" class="font-heading text-xl md:text-2xl text-white opacity-0 transition-opacity duration-1000" style="text-shadow: 0 0 30px rgba(236, 72, 153, 0.5);">This is my heart. Take it.<br>
+      Will you give me yours? ❤️</p>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      recipient_name: 'Maheer',
+      opening_question: 'Will you be my Valentine?'
+    };
+    
+    let config = { ...defaultConfig };
+    
+    let state = {
+      currentScene: 'opening',
+      giftsOpened: [false, false, false, false, false, false, false],
+      currentGiftView: null,
+      allGiftsOpened: false
+    };
+    
+    function createBackgroundParticles() {
+      const container = document.getElementById('bg-particles');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.style.position = 'absolute';
+        particle.style.width = '4px';
+        particle.style.height = '4px';
+        particle.style.background = 'white';
+        particle.style.borderRadius = '50%';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animation = `sparkle 2s ease-in-out infinite`;
+        particle.style.animationDelay = Math.random() * 3 + 's';
+        particle.style.opacity = Math.random() * 0.5 + 0.2;
+        container.appendChild(particle);
+      }
+    }
+    
+    function showScene(sceneName) {
+      document.querySelectorAll('.scene').forEach(scene => {
+        scene.classList.remove('active');
+      });
+      
+      const scene = document.getElementById(`scene-${sceneName}`);
+      if (scene) {
+        setTimeout(() => scene.classList.add('active'), 50);
+      }
+      
+      state.currentScene = sceneName;
+      
+      if (sceneName === 'final') {
+        setTimeout(initFinalHeart, 500);
+      }
+    }
+    
+    function unlockGift(giftNum) {
+      const gift = document.getElementById(`gift-${giftNum}`);
+      const status = document.getElementById(`gift-${giftNum}-status`);
+      const hint = document.getElementById(`gift-${giftNum}-hint`);
+      
+      if (gift) {
+        gift.classList.remove('opacity-50');
+        gift.style.cursor = 'pointer';
+        status.textContent = '✦';
+        status.style.color = 'rgba(236, 72, 153, 0.6)';
+        if (hint) hint.textContent = 'Tap to reveal';
+        
+        gift.onclick = () => openGift(giftNum);
+      }
+    }
+    
+    function openGift(giftNum) {
+      state.currentGiftView = giftNum;
+      state.giftsOpened[giftNum - 1] = true;
+      
+      const status = document.getElementById(`gift-${giftNum}-status`);
+      const dot = document.getElementById(`dot-${giftNum}`);
+      const gift = document.getElementById(`gift-${giftNum}`);
+      
+      status.textContent = '✓';
+      status.style.color = 'rgba(236, 72, 153, 0.9)';
+      dot.classList.add('filled');
+      gift.classList.add('opened');
+      
+      document.getElementById('back-to-gifts').classList.add('visible');
+      
+      document.getElementById('gifts-container').style.opacity = '0';
+      document.getElementById('gifts-container').style.pointerEvents = 'none';
+      
+      const content = document.getElementById(`gift-${giftNum}-content`);
+      content.style.opacity = '1';
+      content.style.pointerEvents = 'auto';
+      
+      if (giftNum < 7) {
+        setTimeout(() => unlockGift(giftNum + 1), 500);
+      }
+      
+      if (giftNum === 1) initLetter();
+      else if (giftNum === 2) initStarlightJar();
+      else if (giftNum === 3) initMagneticNotes();
+      else if (giftNum === 4) initMusicBox();
+      else if (giftNum === 5) initConfettiHeart();
+      else if (giftNum === 6) initStickerReveal();
+      
+      checkAllGiftsOpened();
+    }
+    
+    function closeGiftContent() {
+      if (state.currentGiftView) {
+        const content = document.getElementById(`gift-${state.currentGiftView}-content`);
+        content.style.opacity = '0';
+        content.style.pointerEvents = 'none';
+      }
+      
+      state.currentGiftView = null;
+      document.getElementById('back-to-gifts').classList.remove('visible');
+      
+      document.getElementById('gifts-container').style.opacity = '1';
+      document.getElementById('gifts-container').style.pointerEvents = 'auto';
+    }
+    
+    function checkAllGiftsOpened() {
+      if (state.giftsOpened.every(opened => opened) && !state.allGiftsOpened) {
+        state.allGiftsOpened = true;
+        
+        setTimeout(() => {
+          document.getElementById('final-hint').style.opacity = '1';
+          
+          document.getElementById('final-hint').style.cursor = 'pointer';
+          document.getElementById('final-hint').onclick = () => {
+            showScene('final');
+          };
+        }, 1000);
+      }
+    }
+    
+    function initLetter() {
+      const container = document.getElementById('letter-content');
+      container.innerHTML = '';
+      
+      const name = config.recipient_name || defaultConfig.recipient_name;
+      const letterText = `Dear ${name} 🤍
+
+I won't pretend this is casual.
+It isn't.
+
+Somewhere between the little conversations and the quiet moments,
+you became someone I wanted to choose… every day.
+
+You have this calm confidence that pulls me in without trying.
+And when you smile, everything else fades for a second. ✨
+
+This page, these moments, this effort —
+they're all here for one reason.
+You.
+
+I don't just like you.
+I like the way you make things feel when you're around.
+Warm. Safe. Exciting. 💙💗
+
+If love is intention, honesty, and a little courage —
+then this is me being brave.
+
+I choose you, ${name}.
+And I'd do it again without hesitation. 💫
+
+Always yours 🤍`;
+      
+      const lines = letterText.split('\n');
+      
+      lines.forEach((line, index) => {
+        const p = document.createElement('p');
+        p.style.opacity = '0';
+        p.style.animation = `letter-reveal 0.5s ease forwards`;
+        p.style.animationDelay = `${index * 0.1}s`;
+        p.textContent = line || '\u00A0';
+        container.appendChild(p);
+      });
+    }
+    
+    function initStarlightJar() {
+      const container = document.getElementById('starlight-container');
+      
+      function createStars(x, y) {
+        for (let i = 0; i < 8; i++) {
+          const star = document.createElement('div');
+          star.className = 'star-particle';
+          star.style.left = x + 'px';
+          star.style.top = y + 'px';
+          star.style.background = `hsl(${260 + Math.random() * 80}, 100%, ${50 + Math.random() * 30}%)`;
+          
+          const angle = (Math.PI * 2 * i) / 8;
+          const distance = 60 + Math.random() * 40;
+          const tx = Math.cos(angle) * distance;
+          const ty = Math.sin(angle) * distance;
+          
+          star.style.setProperty('--tx', tx + 'px');
+          star.style.setProperty('--ty', ty + 'px');
+          star.style.animation = `swirl 2s ease-out forwards`;
+          star.style.animationDelay = `${Math.random() * 0.2}s`;
+          
+          container.appendChild(star);
+          setTimeout(() => star.remove(), 2200);
+        }
+      }
+      
+      container.onclick = (e) => {
+        const rect = container.getBoundingClientRect();
+        createStars(e.clientX - rect.left, e.clientY - rect.top);
+      };
+      
+      let isHolding = false;
+      container.onmousedown = () => { isHolding = true; };
+      container.onmouseup = () => { isHolding = false; };
+      container.onmousemove = (e) => {
+        if (isHolding) {
+          const rect = container.getBoundingClientRect();
+          createStars(e.clientX - rect.left, e.clientY - rect.top);
+        }
+      };
+      
+      container.ontouchstart = () => { isHolding = true; };
+      container.ontouchend = () => { isHolding = false; };
+      container.ontouchmove = (e) => {
+        if (isHolding) {
+          const touch = e.touches[0];
+          const rect = container.getBoundingClientRect();
+          createStars(touch.clientX - rect.left, touch.clientY - rect.top);
+        }
+      };
+    }
+    
+    function initMagneticNotes() {
+      const textarea = document.getElementById('magnetic-textarea');
+      const saveBtn = document.getElementById('magnetic-save-btn');
+      const resultDiv = document.getElementById('magnetic-result');
+      
+      saveBtn.onclick = () => {
+        const message = textarea.value.trim();
+        if (message) {
+          resultDiv.textContent = message;
+          resultDiv.style.opacity = '1';
+          textarea.style.opacity = '0.3';
+          textarea.disabled = true;
+          saveBtn.style.opacity = '0.3';
+          saveBtn.disabled = true;
+        }
+      };
+      
+      textarea.focus();
+    }
+    
+    function initMusicBox() {
+      const btn = document.getElementById('music-box-btn');
+      const particlesContainer = document.getElementById('music-particles-container');
+      const message = document.getElementById('music-message');
+      
+      function createMusicParticles() {
+        particlesContainer.innerHTML = '';
+        
+        for (let i = 0; i < 12; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'star-particle';
+          particle.style.left = '50%';
+          particle.style.top = '50%';
+          particle.style.width = (3 + Math.random() * 3) + 'px';
+          particle.style.height = particle.style.width;
+          particle.style.margin = '-' + (particle.style.width / 2) + 'px 0 0 -' + (particle.style.width / 2) + 'px';
+          particle.style.background = `hsl(${260 + Math.random() * 80}, 100%, ${50 + Math.random() * 40}%)`;
+          
+          const angle = (Math.PI * 2 * i) / 12;
+          const distance = 100 + Math.random() * 60;
+          const tx = Math.cos(angle) * distance;
+          const ty = Math.sin(angle) * distance;
+          
+          particle.style.setProperty('--tx', tx + 'px');
+          particle.style.setProperty('--ty', ty + 'px');
+          particle.style.animation = `swirl 2.5s ease-out forwards`;
+          particle.style.animationDelay = `${i * 0.05}s`;
+          
+          particlesContainer.appendChild(particle);
+          setTimeout(() => particle.remove(), 2600);
+        }
+      }
+      
+      btn.onclick = () => {
+        btn.classList.add('animate-heartbeat');
+        createMusicParticles();
+        message.style.opacity = '1';
+        setTimeout(() => btn.classList.remove('animate-heartbeat'), 1500);
+      };
+    }
+    
+    function initConfettiHeart() {
+      const btn = document.getElementById('confetti-heart-btn');
+      const particlesContainer = document.getElementById('confetti-particles-container');
+      
+      function createConfetti() {
+        for (let i = 0; i < 20; i++) {
+          const confetti = document.createElement('div');
+          confetti.style.position = 'absolute';
+          confetti.style.left = '50%';
+          confetti.style.top = '50%';
+          confetti.style.width = '6px';
+          confetti.style.height = '6px';
+          confetti.style.borderRadius = '50%';
+          confetti.style.pointerEvents = 'none';
+          
+          const colors = ['#ec4899', '#a855f7', '#3b82f6', '#fbbf24'];
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          
+          const angle = (Math.PI * 2 * i) / 20;
+          const distance = 80 + Math.random() * 100;
+          const tx = Math.cos(angle) * distance;
+          const ty = Math.sin(angle) * distance;
+          
+          const duration = 1.2 + Math.random() * 0.8;
+          
+          confetti.style.setProperty('--tx', tx + 'px');
+          confetti.style.setProperty('--ty', ty + 'px');
+          confetti.style.animation = `confetti-burst ${duration}s ease-out forwards`;
+          confetti.style.filter = `drop-shadow(0 0 3px ${confetti.style.background})`;
+          
+          particlesContainer.appendChild(confetti);
+          setTimeout(() => confetti.remove(), duration * 1000);
+        }
+      }
+      
+      btn.onclick = () => {
+        btn.classList.add('animate-pulse-soft');
+        createConfetti();
+        setTimeout(() => btn.classList.remove('animate-pulse-soft'), 1500);
+      };
+    }
+    
+    function initStickerReveal() {
+      const grid = document.getElementById('stickers-grid');
+      grid.innerHTML = '';
+      grid.style.display = 'flex';
+      grid.style.justifyContent = 'center';
+      grid.style.gap = '2rem';
+      grid.style.flexWrap = 'wrap';
+      
+      const stickers = [
+        { emoji: '💜', message: 'I' },
+        { emoji: '❤️', message: 'LOVE' },
+        { emoji: '💕', message: 'YOU' }
+      ];
+      
+      stickers.forEach((sticker, i) => {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.alignItems = 'center';
+        container.style.gap = '1rem';
+        
+        const stickerDiv = document.createElement('div');
+        stickerDiv.style.width = '80px';
+        stickerDiv.style.height = '80px';
+        stickerDiv.style.cursor = 'pointer';
+        stickerDiv.style.userSelect = 'none';
+        stickerDiv.style.transition = 'transform 0.3s ease';
+        stickerDiv.style.background = `linear-gradient(135deg, rgba(236, 72, 153, 0.6), rgba(168, 85, 247, 0.6))`;
+        stickerDiv.style.borderRadius = '0.5rem';
+        stickerDiv.style.display = 'flex';
+        stickerDiv.style.alignItems = 'center';
+        stickerDiv.style.justifyContent = 'center';
+        stickerDiv.style.fontSize = '3rem';
+        stickerDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+        stickerDiv.innerHTML = '?';
+        
+        const revealText = document.createElement('div');
+        revealText.style.fontSize = '1.5rem';
+        revealText.style.fontWeight = 'bold';
+        revealText.style.color = `hsl(${260 + i * 45}, 100%, 60%)`;
+        revealText.style.opacity = '0';
+        revealText.style.transition = 'opacity 0.5s ease';
+        revealText.style.textShadow = `0 0 10px hsl(${260 + i * 45}, 100%, 50%)`;
+        revealText.style.letterSpacing = '3px';
+        revealText.textContent = sticker.message;
+        
+        let isRevealed = false;
+        
+        stickerDiv.addEventListener('click', () => {
+          isRevealed = !isRevealed;
+          
+          if (isRevealed) {
+            stickerDiv.style.opacity = '0.3';
+            stickerDiv.style.transform = 'scale(0.9)';
+            revealText.style.opacity = '1';
+          } else {
+            stickerDiv.style.opacity = '1';
+            stickerDiv.style.transform = 'scale(1)';
+            revealText.style.opacity = '0';
+          }
+        });
+        
+        stickerDiv.addEventListener('mouseenter', () => {
+          if (!isRevealed) stickerDiv.style.transform = 'scale(1.1)';
+        });
+        
+        stickerDiv.addEventListener('mouseleave', () => {
+          if (!isRevealed) stickerDiv.style.transform = 'scale(1)';
+        });
+        
+        container.appendChild(stickerDiv);
+        container.appendChild(revealText);
+        grid.appendChild(container);
+      });
+    }
+    
+    function initFinalHeart() {
+      const canvas = document.getElementById('heart-canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const scale = Math.min(canvas.width, canvas.height) * 0.0025;
+      
+      // Generate heart shape points
+      const heartPoints = [];
+      for (let t = 0; t < Math.PI * 2; t += 0.06) {
+        const x = 16 * Math.pow(Math.sin(t), 3);
+        const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+        heartPoints.push({ x: x * scale, y: y * scale });
+      }
+      
+      // Create burst particles from center
+      const burstParticles = [];
+      const numBurst = 400;
+      
+      for (let i = 0; i < numBurst; i++) {
+        const angle = (Math.PI * 2 * i) / numBurst;
+        
+        burstParticles.push({
+          angle: angle,
+          x: centerX,
+          y: centerY,
+          size: Math.random() * 2 + 1
+        });
+      }
+      
+      // Heart formation particles
+      const heartParticles = [];
+      for (let i = 0; i < heartPoints.length; i++) {
+        const point = heartPoints[i];
+        const jitter = (Math.random() - 0.5) * 20 * scale;
+        
+        heartParticles.push({
+          targetX: centerX + point.x + jitter,
+          targetY: centerY + point.y + jitter,
+          x: centerX,
+          y: centerY,
+          size: Math.random() * 3 + 2,
+          delay: i * 6,
+          arrived: false,
+          visible: false
+        });
+      }
+      
+      let animationTime = 0;
+      let heartbeatPhase = 0;
+      let showMessage = false;
+      
+      const burstDuration = 2000;
+      const heartFormationStart = 1800;
+      
+      // Words around heart
+      const metalicWords = ['Mine', 'Forever'];
+      const wordElements = [];
+      
+      const heartContainerElem = document.getElementById('heart-container');
+      metalicWords.forEach((word, i) => {
+        const wordEl = document.createElement('div');
+        wordEl.textContent = word;
+        wordEl.style.position = 'absolute';
+        wordEl.style.fontSize = '1.5rem';
+        wordEl.style.fontWeight = 'bold';
+        wordEl.style.color = `hsl(0, 100%, ${70 - i * 10}%)`;
+        wordEl.style.filter = 'drop-shadow(0 0 12px rgba(255, 0, 0, 0.8))';
+        wordEl.style.fontFamily = 'Cormorant Garamond, serif';
+        wordEl.style.opacity = '0';
+        wordEl.style.pointerEvents = 'none';
+        wordEl.style.zIndex = '10';
+        wordEl.style.letterSpacing = '2px';
+        wordEl.style.animation = `fadeInRotate 1.5s ease-out forwards`;
+        wordEl.style.animationDelay = `${5.2 + i * 0.4}s`;
+        
+        heartContainerElem.appendChild(wordEl);
+        wordElements.push({ el: wordEl, angle: (i / metalicWords.length) * Math.PI * 2 });
+      });
+      
+      const style = document.createElement('style');
+      style.textContent = `@keyframes fadeInRotate { 0% { opacity: 0; transform: scale(0) rotate(-180deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }`;
+      document.head.appendChild(style);
+      
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        animationTime += 16;
+        
+        // Stage 1: Burst from center
+        if (animationTime < burstDuration) {
+          const burstProgress = animationTime / burstDuration;
+          
+          burstParticles.forEach(particle => {
+            const distance = 30 * burstProgress * 5;
+            particle.x = centerX + Math.cos(particle.angle) * distance;
+            particle.y = centerY + Math.sin(particle.angle) * distance;
+            
+            const opacity = Math.max(0, 1 - burstProgress);
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 0, 0, ${opacity * 0.8})`;
+            ctx.fill();
+            
+            const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, 15);
+            gradient.addColorStop(0, `rgba(255, 100, 100, ${opacity * 0.6})`);
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+        
+        // Stage 2: Heart forms
+        if (animationTime >= heartFormationStart) {
+          const heartTime = animationTime - heartFormationStart;
+          
+          heartParticles.forEach(particle => {
+            if (heartTime > particle.delay) {
+              particle.visible = true;
+              const elapsed = heartTime - particle.delay;
+              const progress = Math.min(elapsed / 800, 1);
+              
+              if (progress < 1) {
+                particle.x += (particle.targetX - particle.x) * 0.15;
+                particle.y += (particle.targetY - particle.y) * 0.15;
+              } else {
+                particle.x = particle.targetX;
+                particle.y = particle.targetY;
+                particle.arrived = true;
+              }
+              
+              ctx.beginPath();
+              ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(255, 0, 0, 0.95)`;
+              ctx.fill();
+              
+              const glowGradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size * 5);
+              glowGradient.addColorStop(0, 'rgba(255, 80, 80, 0.6)');
+              glowGradient.addColorStop(1, 'transparent');
+              ctx.fillStyle = glowGradient;
+              ctx.beginPath();
+              ctx.arc(particle.x, particle.y, particle.size * 5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+          
+          // Heartbeat pulse
+          if (animationTime > heartFormationStart + 1200) {
+            heartbeatPhase += 0.05;
+            const pulseScale = 1 + Math.sin(heartbeatPhase) * 0.08;
+            
+            heartParticles.forEach(particle => {
+              if (particle.visible && particle.arrived) {
+                const dx = particle.targetX - centerX;
+                const dy = particle.targetY - centerY;
+                const pulseX = centerX + dx * pulseScale;
+                const pulseY = centerY + dy * pulseScale;
+                
+                ctx.beginPath();
+                ctx.arc(pulseX, pulseY, particle.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 0, 0, 0.95)`;
+                ctx.fill();
+              }
+            });
+          }
+        }
+        
+        // Update word positions
+        wordElements.forEach((item, i) => {
+          if (animationTime > heartFormationStart + 1200) {
+            const radius = 140;
+            const angle = item.angle + heartbeatPhase * 0.12;
+            const x = centerX + Math.cos(angle) * radius - 50;
+            const y = centerY + Math.sin(angle) * radius - 20;
+            item.el.style.left = x + 'px';
+            item.el.style.top = y + 'px';
+          }
+        });
+        
+        if (animationTime > heartFormationStart + 1500 && !showMessage) {
+          showMessage = true;
+          document.getElementById('final-message').style.opacity = '1';
+        }
+        
+        if (animationTime < heartFormationStart + 5500) {
+          requestAnimationFrame(animate);
+        }
+      }
+      
+      animate();
+      
+      canvas.onclick = () => {
+        heartbeatPhase = Math.PI / 2;
+      };
+    }
+    
+    function updateUI() {
+      const name = config.recipient_name || defaultConfig.recipient_name;
+      const question = config.opening_question || defaultConfig.opening_question;
+      
+      document.getElementById('opening-text').textContent = `${question} 💜`;
+      document.getElementById('recipient-greeting').textContent = `— for ${name}`;
+    }
+    
+    async function initElementSdk() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (newConfig) => {
+            config = { ...defaultConfig, ...newConfig };
+            updateUI();
+          },
+          mapToCapabilities: (cfg) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (cfg) => new Map([
+            ['recipient_name', cfg.recipient_name || defaultConfig.recipient_name],
+            ['opening_question', cfg.opening_question || defaultConfig.opening_question]
+          ])
+        });
+      }
+    }
+    
+    document.getElementById('btn-yes').onclick = () => {
+      showScene('gifts');
+      unlockGift(1);
+    };
+    
+    document.getElementById('btn-no').onclick = () => {
+      const response = document.getElementById('no-response');
+      response.style.opacity = '1';
+      
+      const btn = document.getElementById('btn-no');
+      btn.style.animation = 'shake 0.5s ease';
+      
+      setTimeout(() => {
+        response.style.opacity = '0';
+        btn.style.animation = 'none';
+      }, 2000);
+    };
+    
+    document.getElementById('back-to-gifts').onclick = closeGiftContent;
+    
+    createBackgroundParticles();
+    updateUI();
+    initElementSdk();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c9e69e7f18321e6',t:'MTc3MDQyMDQwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
